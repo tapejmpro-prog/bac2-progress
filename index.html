@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progression BAC 2</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/recharts@2.10.3/umd/Recharts.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111827; }
+    input[type="range"] { -webkit-appearance: none; appearance: none; }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } = Recharts;
+
+    function ProgressRadar() {
+      // Load from localStorage or use defaults
+      const getInitialScores = () => {
+        const saved = localStorage.getItem('bac2-scores');
+        if (saved) return JSON.parse(saved);
+        return {
+          neerlandais: 0,
+          droitAdmin: 0,
+          droitSocietes: 0,
+          droitFiscal: 0,
+          gestionFin: 0,
+          resolution: 0,
+          english: 0
+        };
+      };
+
+      const [scores, setScores] = useState(getInitialScores);
+
+      // Save to localStorage whenever scores change
+      useEffect(() => {
+        localStorage.setItem('bac2-scores', JSON.stringify(scores));
+      }, [scores]);
+
+      const data = [
+        { subject: 'Néerlandais', value: scores.neerlandais, fullMark: 100 },
+        { subject: 'Droit Admin', value: scores.droitAdmin, fullMark: 100 },
+        { subject: 'Droit Sociétés', value: scores.droitSocietes, fullMark: 100 },
+        { subject: 'Droit Fiscal', value: scores.droitFiscal, fullMark: 100 },
+        { subject: 'Gestion Fin.', value: scores.gestionFin, fullMark: 100 },
+        { subject: 'Résolution', value: scores.resolution, fullMark: 100 },
+        { subject: 'English', value: scores.english, fullMark: 100 },
+      ];
+
+      const sliders = [
+        { key: 'neerlandais', label: '🇧🇪 Néerlandais', color: '#00D4FF' },
+        { key: 'droitAdmin', label: '⚖️ Droit Admin', color: '#FF6B6B' },
+        { key: 'droitSocietes', label: '🏢 Droit Sociétés', color: '#4ECDC4' },
+        { key: 'droitFiscal', label: '💰 Droit Fiscal', color: '#FFE66D' },
+        { key: 'gestionFin', label: '📊 Gestion Fin.', color: '#95E1D3' },
+        { key: 'resolution', label: '🤝 Résolution', color: '#DDA0DD' },
+        { key: 'english', label: '🇬🇧 English', color: '#F38181' },
+      ];
+
+      const average = Math.round(Object.values(scores).reduce((a, b) => a + b, 0) / 7);
+      
+      const getAverageColor = (avg) => {
+        if (avg < 30) return '#FF6B6B';
+        if (avg < 60) return '#FFE66D';
+        return '#4ECDC4';
+      };
+
+      const updateScore = (key, value) => {
+        setScores(prev => ({ ...prev, [key]: parseInt(value) }));
+      };
+
+      return (
+        <div className="min-h-screen bg-gray-900 p-4 md:p-6 font-sans">
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-4">
+              <h1 className="text-xl md:text-2xl font-bold text-white mb-2">📊 Progression BAC 2</h1>
+              <div className="inline-flex items-center gap-2 bg-gray-800 px-4 py-2 rounded-full border border-gray-700">
+                <span className="text-gray-400 text-sm">Moyenne générale:</span>
+                <span 
+                  className="text-xl md:text-2xl font-bold transition-colors duration-300"
+                  style={{ color: getAverageColor(average) }}
+                >
+                  {average}%
+                </span>
+              </div>
+            </div>
+
+            {/* Radar Chart */}
+            <div 
+              className="bg-gray-800 rounded-2xl p-2 md:p-4 mb-4 border border-gray-700"
+              style={{ boxShadow: '0 0 40px rgba(0, 212, 255, 0.1)' }}
+            >
+              <ResponsiveContainer width="100%" height={300}>
+                <RadarChart data={data} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+                  <PolarGrid stroke="#374151" strokeDasharray="3 3" />
+                  <PolarAngleAxis 
+                    dataKey="subject" 
+                    tick={{ fill: '#9CA3AF', fontSize: 11 }}
+                    tickLine={false}
+                  />
+                  <PolarRadiusAxis 
+                    angle={90} 
+                    domain={[0, 100]} 
+                    tick={{ fill: '#6B7280', fontSize: 9 }}
+                    axisLine={false}
+                    tickCount={5}
+                  />
+                  <Radar
+                    name="Progression"
+                    dataKey="value"
+                    stroke="#00D4FF"
+                    fill="url(#radarGradient)"
+                    fillOpacity={0.6}
+                    strokeWidth={2}
+                    dot={{ fill: '#00D4FF', strokeWidth: 0, r: 4 }}
+                  />
+                  <defs>
+                    <linearGradient id="radarGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#00D4FF" stopOpacity={0.8} />
+                      <stop offset="100%" stopColor="#0066FF" stopOpacity={0.3} />
+                    </linearGradient>
+                  </defs>
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Sliders Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
+              {sliders.map(({ key, label, color }) => (
+                <div 
+                  key={key} 
+                  className="bg-gray-800 rounded-xl p-3 md:p-4 border border-gray-700 hover:border-gray-600 transition-colors"
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-white text-sm font-medium">{label}</span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={scores[key]}
+                        onChange={(e) => updateScore(key, Math.min(100, Math.max(0, e.target.value)))}
+                        className="w-12 bg-gray-700 text-white text-center text-sm rounded px-1 py-0.5 border border-gray-600 focus:outline-none focus:border-cyan-500"
+                      />
+                      <span className="text-gray-400 text-sm">%</span>
+                    </div>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={scores[key]}
+                    onChange={(e) => updateScore(key, e.target.value)}
+                    className="w-full h-2 rounded-lg cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, ${color} 0%, ${color} ${scores[key]}%, #374151 ${scores[key]}%, #374151 100%)`
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <p className="text-center text-gray-600 text-xs mt-4">
+              Q2 2025-2026 • Les données sont sauvegardées localement
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<ProgressRadar />);
+  </script>
+</body>
+</html>
