@@ -4,200 +4,304 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Progression BAC 2</title>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/recharts@2.10.3/umd/Recharts.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #111827; }
-    input[type="range"] { -webkit-appearance: none; appearance: none; }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #ffffff;
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    input[type="range"]::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #ffffff;
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: white;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+      color: #f5f5f7;
+    }
+    
+    .average-box {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .average-badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 10px 24px;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+    
+    .average-label {
+      color: #86868b;
+      font-size: 0.85rem;
+    }
+    
+    .average-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-left: 10px;
+      color: #d4a847;
+    }
+    
+    .chart-container {
+      background: #0a0a0a;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .sliders-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 10px;
+    }
+    
+    .slider-card {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: background 0.2s ease;
+    }
+    
+    .slider-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .slider-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #f5f5f7;
+    }
+    
+    .slider-value {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #d4a847;
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      appearance: none;
+      -webkit-appearance: none;
       cursor: pointer;
-      border: none;
-      box-shadow: 0 0 10px rgba(255,255,255,0.5);
+      background: #1d1d1f;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #d4a847;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(212, 168, 71, 0.4);
+      border: 2px solid #f0d078;
+    }
+    
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #d4a847;
+      cursor: pointer;
+      border: 2px solid #f0d078;
+    }
+    
+    .footer {
+      text-align: center;
+      color: #48484a;
+      font-size: 0.7rem;
+      margin-top: 24px;
+      letter-spacing: 0.02em;
     }
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  
-  <script type="text/babel">
-    const { useState, useEffect } = React;
-    const { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } = Recharts;
+  <div class="container">
+    <h1>📊 Progression BAC 2</h1>
+    
+    <div class="average-box">
+      <div class="average-badge">
+        <span class="average-label">Moyenne générale</span>
+        <span class="average-value" id="averageValue">0%</span>
+      </div>
+    </div>
+    
+    <div class="chart-container">
+      <canvas id="radarChart"></canvas>
+    </div>
+    
+    <div class="sliders-grid" id="slidersContainer"></div>
+    
+    <p class="footer">Q2 2025-2026 • Données sauvegardées localement</p>
+  </div>
 
-    function ProgressRadar() {
-      // Load from localStorage or use defaults
-      const getInitialScores = () => {
-        const saved = localStorage.getItem('bac2-scores');
-        if (saved) return JSON.parse(saved);
-        return {
-          neerlandais: 0,
-          droitAdmin: 0,
-          droitSocietes: 0,
-          droitFiscal: 0,
-          gestionFin: 0,
-          resolution: 0,
-          english: 0
-        };
-      };
+  <script>
+    // Configuration des matières
+    const subjects = [
+      { id: 'neerlandais', label: '🇧🇪 Néerlandais', shortLabel: 'Néerlandais' },
+      { id: 'droitAdmin', label: '⚖️ Droit Admin', shortLabel: 'Droit Admin' },
+      { id: 'droitSocietes', label: '🏢 Droit Sociétés', shortLabel: 'Droit Sociétés' },
+      { id: 'droitFiscal', label: '💰 Droit Fiscal', shortLabel: 'Droit Fiscal' },
+      { id: 'gestionFin', label: '📊 Gestion Fin.', shortLabel: 'Gestion Fin.' },
+      { id: 'resolution', label: '🤝 Résolution', shortLabel: 'Résolution' },
+      { id: 'english', label: '🇬🇧 English', shortLabel: 'English' }
+    ];
 
-      const [scores, setScores] = useState(getInitialScores);
+    // Couleurs dorées
+    const goldColor = 'rgba(212, 168, 71, 0.35)';
+    const goldBorder = '#d4a847';
+    const goldLight = '#f0d078';
 
-      // Save to localStorage whenever scores change
-      useEffect(() => {
-        localStorage.setItem('bac2-scores', JSON.stringify(scores));
-      }, [scores]);
+    // Charger les scores depuis localStorage ou initialiser à 0
+    let scores = JSON.parse(localStorage.getItem('bac2-scores')) || {};
+    subjects.forEach(s => {
+      if (scores[s.id] === undefined) scores[s.id] = 0;
+    });
 
-      const data = [
-        { subject: 'Néerlandais', value: scores.neerlandais, fullMark: 100 },
-        { subject: 'Droit Admin', value: scores.droitAdmin, fullMark: 100 },
-        { subject: 'Droit Sociétés', value: scores.droitSocietes, fullMark: 100 },
-        { subject: 'Droit Fiscal', value: scores.droitFiscal, fullMark: 100 },
-        { subject: 'Gestion Fin.', value: scores.gestionFin, fullMark: 100 },
-        { subject: 'Résolution', value: scores.resolution, fullMark: 100 },
-        { subject: 'English', value: scores.english, fullMark: 100 },
-      ];
+    // Créer le graphique radar
+    const ctx = document.getElementById('radarChart').getContext('2d');
+    const radarChart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: subjects.map(s => s.shortLabel),
+        datasets: [{
+          label: 'Progression',
+          data: subjects.map(s => scores[s.id]),
+          backgroundColor: goldColor,
+          borderColor: goldBorder,
+          borderWidth: 2,
+          pointBackgroundColor: goldLight,
+          pointBorderColor: goldLight,
+          pointBorderWidth: 0,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              stepSize: 20,
+              color: '#3a3a3c',
+              backdropColor: 'transparent',
+              font: {
+                size: 10
+              }
+            },
+            grid: {
+              color: '#2c2c2e',
+              lineWidth: 1
+            },
+            angleLines: {
+              color: '#2c2c2e',
+              lineWidth: 1
+            },
+            pointLabels: {
+              color: '#86868b',
+              font: {
+                size: 11,
+                weight: '500'
+              }
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        elements: {
+          line: {
+            tension: 0
+          }
+        }
+      }
+    });
 
-      const sliders = [
-        { key: 'neerlandais', label: '🇧🇪 Néerlandais', color: '#00D4FF' },
-        { key: 'droitAdmin', label: '⚖️ Droit Admin', color: '#FF6B6B' },
-        { key: 'droitSocietes', label: '🏢 Droit Sociétés', color: '#4ECDC4' },
-        { key: 'droitFiscal', label: '💰 Droit Fiscal', color: '#FFE66D' },
-        { key: 'gestionFin', label: '📊 Gestion Fin.', color: '#95E1D3' },
-        { key: 'resolution', label: '🤝 Résolution', color: '#DDA0DD' },
-        { key: 'english', label: '🇬🇧 English', color: '#F38181' },
-      ];
-
-      const average = Math.round(Object.values(scores).reduce((a, b) => a + b, 0) / 7);
-      
-      const getAverageColor = (avg) => {
-        if (avg < 30) return '#FF6B6B';
-        if (avg < 60) return '#FFE66D';
-        return '#4ECDC4';
-      };
-
-      const updateScore = (key, value) => {
-        setScores(prev => ({ ...prev, [key]: parseInt(value) }));
-      };
-
-      return (
-        <div className="min-h-screen bg-gray-900 p-4 md:p-6 font-sans">
-          <div className="max-w-4xl mx-auto">
-            {/* Header */}
-            <div className="text-center mb-4">
-              <h1 className="text-xl md:text-2xl font-bold text-white mb-2">📊 Progression BAC 2</h1>
-              <div className="inline-flex items-center gap-2 bg-gray-800 px-4 py-2 rounded-full border border-gray-700">
-                <span className="text-gray-400 text-sm">Moyenne générale:</span>
-                <span 
-                  className="text-xl md:text-2xl font-bold transition-colors duration-300"
-                  style={{ color: getAverageColor(average) }}
-                >
-                  {average}%
-                </span>
-              </div>
-            </div>
-
-            {/* Radar Chart */}
-            <div 
-              className="bg-gray-800 rounded-2xl p-2 md:p-4 mb-4 border border-gray-700"
-              style={{ boxShadow: '0 0 40px rgba(0, 212, 255, 0.1)' }}
-            >
-              <ResponsiveContainer width="100%" height={300}>
-                <RadarChart data={data} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
-                  <PolarGrid stroke="#374151" strokeDasharray="3 3" />
-                  <PolarAngleAxis 
-                    dataKey="subject" 
-                    tick={{ fill: '#9CA3AF', fontSize: 11 }}
-                    tickLine={false}
-                  />
-                  <PolarRadiusAxis 
-                    angle={90} 
-                    domain={[0, 100]} 
-                    tick={{ fill: '#6B7280', fontSize: 9 }}
-                    axisLine={false}
-                    tickCount={5}
-                  />
-                  <Radar
-                    name="Progression"
-                    dataKey="value"
-                    stroke="#00D4FF"
-                    fill="url(#radarGradient)"
-                    fillOpacity={0.6}
-                    strokeWidth={2}
-                    dot={{ fill: '#00D4FF', strokeWidth: 0, r: 4 }}
-                  />
-                  <defs>
-                    <linearGradient id="radarGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#00D4FF" stopOpacity={0.8} />
-                      <stop offset="100%" stopColor="#0066FF" stopOpacity={0.3} />
-                    </linearGradient>
-                  </defs>
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Sliders Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
-              {sliders.map(({ key, label, color }) => (
-                <div 
-                  key={key} 
-                  className="bg-gray-800 rounded-xl p-3 md:p-4 border border-gray-700 hover:border-gray-600 transition-colors"
-                >
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-white text-sm font-medium">{label}</span>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={scores[key]}
-                        onChange={(e) => updateScore(key, Math.min(100, Math.max(0, e.target.value)))}
-                        className="w-12 bg-gray-700 text-white text-center text-sm rounded px-1 py-0.5 border border-gray-600 focus:outline-none focus:border-cyan-500"
-                      />
-                      <span className="text-gray-400 text-sm">%</span>
-                    </div>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={scores[key]}
-                    onChange={(e) => updateScore(key, e.target.value)}
-                    className="w-full h-2 rounded-lg cursor-pointer"
-                    style={{
-                      background: `linear-gradient(to right, ${color} 0%, ${color} ${scores[key]}%, #374151 ${scores[key]}%, #374151 100%)`
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* Footer */}
-            <p className="text-center text-gray-600 text-xs mt-4">
-              Q2 2025-2026 • Les données sont sauvegardées localement
-            </p>
-          </div>
+    // Créer les sliders
+    const slidersContainer = document.getElementById('slidersContainer');
+    subjects.forEach(subject => {
+      const card = document.createElement('div');
+      card.className = 'slider-card';
+      card.innerHTML = `
+        <div class="slider-header">
+          <span class="slider-label">${subject.label}</span>
+          <span class="slider-value" id="value-${subject.id}">${scores[subject.id]}%</span>
         </div>
-      );
+        <input type="range" min="0" max="100" value="${scores[subject.id]}" id="slider-${subject.id}"
+          style="background: linear-gradient(to right, #d4a847 0%, #d4a847 ${scores[subject.id]}%, #1d1d1f ${scores[subject.id]}%, #1d1d1f 100%);">
+      `;
+      slidersContainer.appendChild(card);
+
+      // Event listener
+      const slider = card.querySelector('input');
+      slider.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value);
+        scores[subject.id] = value;
+        
+        // Update display
+        document.getElementById(`value-${subject.id}`).textContent = value + '%';
+        slider.style.background = `linear-gradient(to right, #d4a847 0%, #d4a847 ${value}%, #1d1d1f ${value}%, #1d1d1f 100%)`;
+        
+        // Update chart
+        updateChart();
+        
+        // Save
+        localStorage.setItem('bac2-scores', JSON.stringify(scores));
+      });
+    });
+
+    // Fonction de mise à jour
+    function updateChart() {
+      radarChart.data.datasets[0].data = subjects.map(s => scores[s.id]);
+      radarChart.update('none');
+      updateAverage();
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<ProgressRadar />);
+    function updateAverage() {
+      const values = subjects.map(s => scores[s.id]);
+      const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+      const avgElement = document.getElementById('averageValue');
+      avgElement.textContent = avg + '%';
+    }
+
+    // Initial update
+    updateAverage();
   </script>
 </body>
 </html>
